@@ -1,1 +1,0 @@
-Databaseprosjekt gruppe 112, velkommen 
