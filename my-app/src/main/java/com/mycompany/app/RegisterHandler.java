@@ -1,6 +1,7 @@
 package com.mycompany.app;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
@@ -11,7 +12,26 @@ public class RegisterHandler {
 	
 	static Connection conn = Connect.getConn();
 	static Statement stmt;
+	Connection conn_2 = Connect.getConn();
+	Statement stmt_2;
+	int number;
 	
+	public int getLastPrimaryKey() {
+		try {
+			stmt_2 = conn_2.createStatement();
+			String sql = "SELECT * FROM Apparat ORDER BY ApparatID DESC LIMIT 1";
+			ResultSet rs;
+			rs = stmt_2.executeQuery(sql);
+			rs.next();
+			number = rs.getInt("ApparatID");
+			return number;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
 	
 	public static void registerApparat(int apparatID, String navn, String beskrivelse) {
 		try {
@@ -37,10 +57,10 @@ public class RegisterHandler {
 		}
 	}
 	
-	public static void registerFriOvelse(String Ovelsenavn, String beskrivelse) {
+	public static void registerFriOvelse(String ovelsenavn, String beskrivelse) {
 		try {
 			stmt = conn.createStatement();
-			String sql = String.format("INSERT INTO `FrivektsOvelse`(`Ovelsenavn`, `Beskrivelse`) VALUES ('%s','%s')", Ovelsenavn, beskrivelse);
+			String sql = String.format("INSERT INTO `FrivektsOvelse`(`Ovelsenavn`, `Beskrivelse`) VALUES ('%s','%s')", ovelsenavn, beskrivelse);
 			stmt.executeUpdate(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -60,6 +80,8 @@ public class RegisterHandler {
 		registerApparat(19, apparat, beskrivelse);
 		System.out.println("Du har satt inn: " + apparat + ", med beskrivelse: " + beskrivelse);
 		
+		RegisterHandler handler = new RegisterHandler();
+		System.out.println(handler.getLastPrimaryKey());
 		
 	}
 
