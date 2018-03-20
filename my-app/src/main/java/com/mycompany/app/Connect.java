@@ -14,7 +14,9 @@ public class Connect {
 			
 			//connection to database
 			Connection conn = DriverManager.getConnection(url, user, pw);
+			
 			return conn;
+			
 		}
 		catch (Exception exc) {
 			exc.printStackTrace();
