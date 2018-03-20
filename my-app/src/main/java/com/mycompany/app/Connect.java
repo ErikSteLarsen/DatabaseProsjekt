@@ -25,7 +25,7 @@ public class Connect {
 	}
 	
 	public static void main(String[] args) {
-		Connection conn = Connect.getConn();
+		//Connection conn = Connect.getConn();
 	}
 	
 }
