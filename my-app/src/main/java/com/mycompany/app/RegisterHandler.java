@@ -45,6 +45,7 @@ public class RegisterHandler {
 		}
 	}
 	
+
 	public static void registerApparatOvelse(String ovelsenavn, double antallKilo, int antallSett) {
 		try {
 			stmt = conn.createStatement();
@@ -71,8 +72,8 @@ public class RegisterHandler {
 
 	
 	public static void main(String[] args) {
+		System.out.println("Skriv inn navnet paa apparatet: ");
 		System.out.println("Velkommen til Treningsdagboken!");
-		System.out.println("Skriv inn navnet på apparatet: ");
 		Scanner scanner = new Scanner(System.in);
 		String apparat = scanner.nextLine();
 		System.out.println("Beskrivelse: ");
