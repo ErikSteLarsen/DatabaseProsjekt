@@ -25,10 +25,11 @@ public class RegisterHandler {
 		}
 	}
 	
-	public static void registerApparatOvelse(String Ovelsenavn, double antallKilo, int antallSett) {
+
+	public static void registerApparatOvelse(String ovelsenavn, double antallKilo, int antallSett) {
 		try {
 			stmt = conn.createStatement();
-			String sql = String.format("INSERT INTO `ApparatØvelse`(`Øvelsenavn`, `Antall_Sett`, `Antall_Kilo`) VALUES ('%s','%s','%s')", Ovelsenavn, antallKilo, antallSett);
+			String sql = String.format("INSERT INTO `ApparatOvelse`(`Ovelsenavn`, `Antall_Sett`, `Antall_Kilo`) VALUES ('%s','%s','%s')", ovelsenavn, antallKilo, antallSett);
 			stmt.executeUpdate(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -52,6 +53,7 @@ public class RegisterHandler {
 	
 	public static void main(String[] args) {
 		System.out.println("Skriv inn navnet paa apparatet: ");
+		System.out.println("Velkommen til Treningsdagboken!");
 		Scanner scanner = new Scanner(System.in);
 		String apparat = scanner.nextLine();
 		System.out.println("Beskrivelse: ");
