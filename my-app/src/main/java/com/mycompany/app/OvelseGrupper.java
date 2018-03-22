@@ -34,17 +34,15 @@ public class OvelseGrupper {
 	}
 	
 	// finner gruppeid til gitt ovelsegruppe
-	public int findGroupID(String navn) {
+	private int findGroupID(String navn) {
 		int id = -1;
 		try {
 			stmt = conn.createStatement();
-			String sql = "SELECT * FROM OvelseGruppe";
+			String sql = String.format("SELECT * FROM OvelseGruppe WHERE Navn='%s'", navn);
 			ResultSet rs;
 			rs = stmt.executeQuery(sql);
 			while(rs.next()) {
-				if(navn.equals(rs.getString("Navn"))) {
 					id = rs.getInt("GruppeID");
-				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -135,7 +133,6 @@ public class OvelseGrupper {
 			//System.out.println(rs.getInt("GruppeID"));
 			rs.next();
 			int id = rs.getInt(1);
-			System.out.println("ID " + id);
 			
 			
 			for (String key : apparatOvelseKeys) {
@@ -156,7 +153,7 @@ public class OvelseGrupper {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+		System.out.println("Øvelsene er lagt inn i gruppen " + navn);
 	}
 	
 	public List<String> apparatOvelseList(){

@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
@@ -16,6 +17,8 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.mycompany.app.Connect;
 
@@ -60,9 +63,7 @@ public class MainProgram {
 		try {
 			stmt = conn.createStatement();
 			String sql1 = String.format("INSERT INTO `Ovelse`(`Ovelsenavn`) VALUES ('%s')", Ovelsenavn);
-			String sql = String.format("INSERT INTO `FrivektsOvelse`(`Ovelsenavn`) VALUES ('%s')", Ovelsenavn);
 			stmt.executeUpdate(sql1);
-			stmt.executeUpdate(sql);
 			stmt = conn.createStatement();
 			String sql2 = String.format("INSERT INTO `FrivektsOvelse`(`Ovelsenavn`, `Tekstlig_beskrivelse`) VALUES ('%s','%s')", Ovelsenavn, beskrivelse);
 			stmt.executeUpdate(sql2);
@@ -117,7 +118,7 @@ public class MainProgram {
 	public static void infoOmSisteOkter(int n) {
 		try {
 			stmt = conn.createStatement();
-			String sql = String.format("SELECT * FROM Treningsokt WHERE OktID <= '%s' order by OktID DESC", n);
+			String sql = String.format("SELECT * FROM Treningsokt order by OktID DESC LIMIT " + n);
 			Statement stmt2 = conn.createStatement();
 			
 			ResultSet result = stmt.executeQuery(sql);
@@ -132,15 +133,16 @@ public class MainProgram {
 				String sql_notater = String.format("SELECT `Beskrivelse` FROM `NotatForOkt` WHERE `OktID`='%s'", oktID);
 				
 				ResultSet result_notat = stmt2.executeQuery(sql_notater);
+				String notat = "Ingenting";
 				while(result_notat.next()) {
-					String notat = result_notat.getString("Beskrivelse");
-					System.out.println("-----------------------------------------------");
-					System.out.println("Okt nr " + String.valueOf(oktID) + ": " + '\n' + "Dato: " + '\n' + String.valueOf(dato) + 
-						"\nTidspunkt: " + String.valueOf(tidspunkt) + '\n' + "Varighet: " + String.valueOf(varighet) + '\n' + 
-						"Form: " + form + '\n' + "Prestasjon: " + prestasjon + '\n' + 
-						"Notat: " + notat + '\n'
-						);
+					notat = result_notat.getString("Beskrivelse");
 				}
+				System.out.println("-----------------------------------------------");
+				System.out.println("Okt nr " + String.valueOf(oktID) + ": " + '\n' + "Dato: " + '\n' + String.valueOf(dato) + 
+					"\nTidspunkt: " + String.valueOf(tidspunkt) + '\n' + "Varighet: " + String.valueOf(varighet) + '\n' + 
+					"Form: " + form + '\n' + "Prestasjon: " + prestasjon + '\n' + 
+					"Notat: " + notat + '\n'
+					);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -241,7 +243,6 @@ public class MainProgram {
 					System.out.println("Dette var den første treningsøkten");
 					break;
 				}
-				System.out.println("Ovelsenavn, loop: " + result.getString("Ovelsenavn"));
 				if(result.getInt("OktID")==oktid) {
 					ovelsenavn = result.getString("Ovelsenavn");
 					oktID = result.getInt("OktID");
@@ -271,6 +272,86 @@ public class MainProgram {
 		}
 	}
 	
+	static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+	
+	
+	public static ArrayList<String> showResults(String ovelse, java.util.Date date2, java.util.Date date3){
+		ArrayList<String> ovelser = new ArrayList<String>();
+		ArrayList<Date> dates = new ArrayList<Date>();
+		Set<Integer> oktID = new TreeSet<Integer>();
+		ArrayList<Integer> form = new ArrayList<Integer>();
+		ArrayList<Integer> prestasjon = new ArrayList<Integer>();
+		ArrayList<Integer> varighet = new ArrayList<Integer>();
+		ArrayList<Integer> vekt = new ArrayList<Integer>();
+		ArrayList<Integer> sett = new ArrayList<Integer>();
+		
+		try {
+			stmt = conn.createStatement();
+			String sql = "SELECT * FROM ApparatOvelse";
+			ResultSet rs = stmt.executeQuery(sql);
+			while (rs.next()) {	
+				ovelser.add(rs.getString("Ovelsenavn"));
+				}
+			if(ovelser.contains(ovelse)) {
+			System.out.println(ovelse);
+			}
+			}catch (SQLException e) {
+				e.printStackTrace();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}	
+	
+		try {
+			stmt = conn.createStatement();
+			String sql2 = "SELECT * FROM Treningsokt";
+			ResultSet rs2 = stmt.executeQuery(sql2);
+			ArrayList<Date> validDates = new ArrayList<Date>();
+			while(rs2.next()) {
+				dates.add(rs2.getDate("Dato"));			
+				
+				}
+			for(Date date: dates) {
+				if((date.after(date2) && date.before(date3))||date.equals(date2)||date.equals(date3)) {
+					validDates.add(date);
+				}
+			}
+			for(int i = 0; i < validDates.size(); i++) {
+				Date trainingDate = validDates.get(i);
+				String sql3 = String.format("SELECT OktID FROM Treningsokt WHERE Dato = '%s'", trainingDate);
+				ResultSet rs3 = stmt.executeQuery(sql3);
+				while(rs3.next()) {
+					int id = rs3.getInt("OktID");
+					oktID.add(id);
+				}
+			}
+			if(ovelser.contains(ovelse)) {
+				for(int i: oktID) {
+				String sql5 = String.format("SELECT * FROM ApparatOvelseForOkt WHERE OktID = '%s' AND Ovelsenavn = '%s'",i, ovelse);
+				ResultSet rs5 = stmt.executeQuery(sql5);
+				while(rs5.next()) {
+					vekt.add(rs5.getInt("Vekt"));
+					sett.add(rs5.getInt("Sett"));
+				}
+				}
+				for(int j = 0; j< vekt.size(); j++) {
+					System.out.println("Du trente med " + vekt.get(j) + " kg og hadde " + sett.get(j) + " sett.");
+			}
+			}
+			else {
+				System.out.println("Ovelsen eksisterer ikke");
+			}
+				
+			
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+		
+	}
+	
 	// -------------------------------------------------------------------------------------------------------------------------
 	
 	
@@ -285,6 +366,7 @@ public class MainProgram {
 		Scanner scanner = new Scanner(System.in);
 		
 		//Intro start
+		System.out.println("-----------------------------------------------");
 		System.out.println("Velkommen til Treningsdagboken!");
 		System.out.println("Under vil du få opp ulike alternativer til hva du kan gjøre.");
 		System.out.println("Når du skal velge alternativ svarer du med tall.\n");
@@ -392,33 +474,6 @@ public class MainProgram {
 					String ovelsenavn = scanner.nextLine();
 					
 					
-					// ovelsekilo med sjekk for riktig input -----------------
-					double ovelsekilo = 0;
-					System.out.println("-----------------------------------------------");
-					System.out.println("Vennligst skriv inn antall kilo (int): ");
-					String ovelsekiloString = scanner.nextLine();
-				
-					while (isDouble(ovelsekiloString) == false) {
-						System.out.println("-----------------------------------------------");
-						System.out.println("Vennligst skriv inn antall kilo (int): ");
-						ovelsekiloString = scanner.nextLine();
-					}
-					ovelsekilo = Double.parseDouble(ovelsekiloString);
-					// ovelsekilo ferdig med sjekk for riktig input -----------
-						
-					// ----------------
-					int antallsett = 0;
-					System.out.println("-----------------------------------------------");
-					System.out.println("Vennligst skriv inn antall sett (int): ");
-					String antallsettString = scanner.nextLine();
-					
-					while (isInteger(antallsettString) == false) {
-						System.out.println("-----------------------------------------------");
-						System.out.println("Vennligst skriv inn antall sett (int): ");
-						antallsettString = scanner.nextLine();
-					}
-					antallsett = Integer.parseInt(antallsettString);
-					
 					// ----------------
 					registerApparatOvelse(ovelsenavn);
 					System.out.println("Apparatovelsen ble registrert.");
@@ -451,7 +506,6 @@ public class MainProgram {
 				System.out.println("Vennligst skriv inn dato og tidspunkt for okten: (FORMAT: 'yyyy-MM-dd HH:mm:ss')");
 				String datetimeobjekt = scanner.nextLine();
 				
-				// ferdig med 'dt' datetime, kan være feil her  ---------------------------------------
 				// start med varighet				 ---------------------------------------
 				int varighet = 0;
 				System.out.println("-----------------------------------------------");
@@ -616,6 +670,27 @@ public class MainProgram {
 			else if (valgtAlternativ == 5) { 
 				System.out.println("-----------------------------------------------");
 				System.out.println("Se resultatlogg fra et gitt tidsintervall:\n");
+				System.out.println("Tilgjengelige ovelser:");
+				System.out.println(apparatOvelseListErik());
+				
+				System.out.println("Skriv inn ovelse:");
+				String ovelse = scanner.next();
+				System.out.println("Enter the Date : (format: yyyy/mm/dd )");
+				String startDate = scanner.next();
+				System.out.println("Enter the Date : (format: yyyy/mm/dd )");
+				String endDate = scanner.next();
+				java.util.Date date2 = null;
+				java.util.Date date3 = null;
+				try {
+				    //Parsing the String
+				    date2 = dateFormat.parse(startDate);
+				    date3 = dateFormat.parse(endDate);
+				} catch (ParseException e) {
+				    // TODO Auto-generated catch block
+				    e.printStackTrace();
+				}
+				//System.out.println(date2);
+				showResults(ovelse,date2,date3);
 			
 			}
 			
@@ -675,7 +750,6 @@ public class MainProgram {
 					while(rs.next()) {
 						System.out.println("ID: " + rs.getInt("OktID") + " Dato: " + rs.getDate("Dato").toString());
 					}
-					
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -711,13 +785,9 @@ public class MainProgram {
 				System.out.println("-----------------------------------------------");
 				System.out.println("Velg apparat:");
 				String valgtApparat = scanner.nextLine();
-				
 
 				getProsentOkning(valgtOktID, valgtApparat);
-				
-				
-				
-				
+
 			}
 			
 			else { 
