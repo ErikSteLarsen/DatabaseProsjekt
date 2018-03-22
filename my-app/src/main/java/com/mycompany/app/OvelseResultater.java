@@ -26,7 +26,6 @@ public class OvelseResultater {
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				tidspunkt.add(rs.getDate("Dato"));
-				System.out.println(rs.getDate("Dato"));
 			}
 			return tidspunkt;
 		}catch (SQLException e) {
