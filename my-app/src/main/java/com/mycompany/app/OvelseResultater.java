@@ -10,7 +10,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.sql.ResultSet;
 
 
@@ -23,41 +22,26 @@ public class OvelseResultater {
 	static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
 	
 	
-	/*public static ArrayList<Date> getOvelseTidspunkt() {
-		ArrayList<Date> tidspunkt = new ArrayList<Date>();
-		try {
-			stmt = conn.createStatement();
-			String sql = "SELECT Dato FROM Treningsokt";
-			ResultSet rs = stmt.executeQuery(sql);
-			while (rs.next()) {
-				tidspunkt.add(rs.getDate("Dato"));
-			}
-			return tidspunkt;
-		}catch (SQLException e) {
-			e.printStackTrace();
-		}catch (Exception e) {
-			e.printStackTrace();
-	}
-	return null;
-}*/
-	
-	
 	public static ArrayList<String> showResults(String ovelse, Date startDate, Date endDate){
 		ArrayList<String> ovelser = new ArrayList<String>();
 		ArrayList<Date> dates = new ArrayList<Date>();
 		Set<Integer> oktID = new TreeSet<Integer>();
 		ArrayList<Integer> form = new ArrayList<Integer>();
 		ArrayList<Integer> prestasjon = new ArrayList<Integer>();
+		ArrayList<Integer> varighet = new ArrayList<Integer>();
+		ArrayList<Integer> vekt = new ArrayList<Integer>();
+		ArrayList<Integer> sett = new ArrayList<Integer>();
 		
 		try {
 			stmt = conn.createStatement();
-			String sql = "SELECT * FROM Ovelse";
+			String sql = "SELECT * FROM ApparatOvelse";
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {	
 				ovelser.add(rs.getString("Ovelsenavn"));
-				
 				}
-			System.out.println(ovelser);
+			if(ovelser.contains(ovelse)) {
+			System.out.println(ovelse);
+			}
 			}catch (SQLException e) {
 				e.printStackTrace();
 			}catch (Exception e) {
@@ -71,15 +55,11 @@ public class OvelseResultater {
 			ArrayList<Date> validDates = new ArrayList<Date>();
 			while(rs2.next()) {
 				dates.add(rs2.getDate("Dato"));			
-				//oktID.add(rs2.getInt("OktID"));
-				//form.add(rs2.getInt("Form"));
-				//prestasjon.add(rs2.getInt("Prestasjon"));
 				
 				}
 			for(Date date: dates) {
 				if((date.after(startDate) && date.before(endDate))||date.equals(startDate)||date.equals(endDate)) {
 					validDates.add(date);
-					System.out.println(date);
 				}
 			}
 			for(int i = 0; i < validDates.size(); i++) {
@@ -89,19 +69,33 @@ public class OvelseResultater {
 				while(rs3.next()) {
 					int id = rs3.getInt("OktID");
 					oktID.add(id);
-					System.out.println(rs3.getInt("OktID"));
 				}
 			}
+			if(ovelser.contains(ovelse)) {
+				for(int i: oktID) {
+				String sql5 = String.format("SELECT * FROM ApparatOvelseForOkt WHERE OktID = '%s' AND Ovelsenavn = '%s'",i, ovelse);
+				ResultSet rs5 = stmt.executeQuery(sql5);
+				while(rs5.next()) {
+					vekt.add(rs5.getInt("Vekt"));
+					sett.add(rs5.getInt("Sett"));
+				}
+				}
+				for(int j = 0; j< vekt.size(); j++) {
+					System.out.println("Du trente med " + vekt.get(j) + " kg og hadde " + sett.get(j) + " sett.");
+			}
+			}
+			else {
+				System.out.println("Ovelsen eksisterer ikke");
+			}
+				
 			
-			System.out.println(dates);
-			System.out.println(validDates);
-			System.out.println(oktID);
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 		
 		return null;
 		
@@ -114,6 +108,8 @@ public class OvelseResultater {
 	
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
+		System.out.println("Skriv inn ovelse:");
+		String ovelse = scanner.next();
 		System.out.println("Enter the Date : (format: yyyy/mm/dd )");
 		String startDate = scanner.next();
 		System.out.println("Enter the Date : (format: yyyy/mm/dd )");
@@ -130,8 +126,7 @@ public class OvelseResultater {
 		    e.printStackTrace();
 		}
 		//System.out.println(date2);
-		System.out.println(date2);
-		showResults("benk",date2,date3);
+		showResults(ovelse,date2,date3);
 		 
 	}
 }
