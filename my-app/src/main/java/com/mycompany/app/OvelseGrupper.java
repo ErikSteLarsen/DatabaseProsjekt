@@ -14,42 +14,6 @@ public class OvelseGrupper {
 	Connection conn = Connect.getConn();
 	Statement stmt;
 	
-	// lager øvelsegruppe ved å sette navnet på den. privatfunksjon for å finne høyeste gruppeid
-	public boolean createGroup(String navn) {
-		int id = findMaxId();
-		if (id == -1) {
-			return false;
-		}
-		try {
-			stmt = conn.createStatement();
-			String sql = String.format("INSERT INTO OvelseGruppe(GruppeID, Navn) VALUES ('%s','%s')", id+1, navn);
-			stmt.executeUpdate(sql);
-			return true;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-	
-	private int findMaxId() {
-		int id;
-		try {
-			stmt = conn.createStatement();
-			String sql = "SELECT * FROM OvelseGruppe ORDER BY GruppeID DESC LIMIT 1";
-			ResultSet rs = stmt.executeQuery(sql);
-			rs.next();
-			id = rs.getInt("GruppeID");
-			return id;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return -1;
-	}
-	
 	// returnerer gruppenavn som array
 	public ArrayList<String> showGroups(){
 		ArrayList<String>groups = new ArrayList<String>();
@@ -78,8 +42,8 @@ public class OvelseGrupper {
 			ResultSet rs;
 			rs = stmt.executeQuery(sql);
 			while(rs.next()) {
-				if(navn == rs.getString("Navn")) {
-					id = rs.getInt("GroupID");
+				if(navn.equals(rs.getString("Navn"))) {
+					id = rs.getInt("GruppeID");
 				}
 			}
 		} catch (SQLException e) {
@@ -120,23 +84,56 @@ public class OvelseGrupper {
 		
 		List<String> chosenApparatOvelser = new ArrayList<String>();
 		List<String> chosenFrivektsOvelser = new ArrayList<String>();
-		List<Integer> apparatOvelseKeys = new ArrayList<Integer>();
-		List<Integer> frivektsOvelseKeys = new ArrayList<Integer>();
+		List<String> apparatOvelseKeys = new ArrayList<String>();
+		List<String> frivektsOvelseKeys = new ArrayList<String>();
 		
 		int i = sc.nextInt();
 		chosenApparatOvelser.add(apparatOvelseList().get(i));
 		
 		for (String ovelse : chosenApparatOvelser) {
 			String[] split = ovelse.split(":");
-			apparatOvelseKeys.add(Integer.valueOf(split[0]));
+			apparatOvelseKeys.add(split[1]);
 		}
 		
 		for (String ovelse : chosenFrivektsOvelser) {
 			String[] split = ovelse.split(":");
-			frivektsOvelseKeys.add(Integer.valueOf(split[0]));
+			frivektsOvelseKeys.add(split[1]);
 		}
 		
 		
+		try {
+			String sql = String.format("INSERT INTO OvelseGruppe(Navn) VALUES ('%s')", navn);
+			PreparedStatement stmt_1 = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			stmt_1.executeUpdate();
+			
+			ResultSet rs = stmt_1.getGeneratedKeys();
+			//System.out.println(rs.getInt("GruppeID"));
+			rs.next();
+			int id = rs.getInt(1);
+			System.out.println("ID " + id);
+			
+			
+			for (String key : apparatOvelseKeys) {
+				String sql_2 = String.format("INSERT INTO OvelseIGruppe(GruppeID, Ovelsenavn) VALUES ('%s', '%s')", id, key);
+				PreparedStatement stmt_2 = conn.prepareStatement(sql_2);
+				stmt_2.executeUpdate();
+			}
+			
+			
+			for (String key : frivektsOvelseKeys) {
+				String sql_2 = String.format("INSERT INTO OvelseIGruppe(GruppeID, Ovelsenavn) VALUES ('%s', '%s')", id, key);
+				PreparedStatement stmt_2 = conn.prepareStatement(sql_2);
+				stmt_2.executeUpdate();
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("BRUH");
+		sc.close();
+	}
 	
 	public List<String> apparatOvelseList(){
 		List<String> apparatOvelse = new ArrayList<String>();
@@ -180,6 +177,7 @@ public class OvelseGrupper {
 		return frivektsOvelse;
 	}
 	
+	/* private funksjoner for å sjekke om øvelser eksisterer. men brukes ikke.
 	private boolean checkApparat(String ovelsenavn) {
 		try {
 			stmt = conn.createStatement();
@@ -215,8 +213,11 @@ public class OvelseGrupper {
 		}
 		return false;
 	}
+*/
+
+	
 	public static void main(String[] args) {
 		OvelseGrupper app = new OvelseGrupper();
-		app.createOvelseGruppe("test");
+		System.out.println(app.showGroups());
 	}
 }
