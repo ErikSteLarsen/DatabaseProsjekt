@@ -53,7 +53,7 @@ public class RegisterHandler {
 		try {
 			stmt = conn.createStatement();
 			String sql1 = String.format("INSERT INTO `Ovelse`(`Ovelsenavn`) VALUES ('%s')", Ovelsenavn);
-			String sql = String.format("INSERT INTO `FrivektsOvelse`(`Ovelsenavn`, `Beskrivelse`) VALUES ('%s','%s')", Ovelsenavn, beskrivelse);
+			String sql = String.format("INSERT INTO `FrivektsOvelse`(`Ovelsenavn`, `Tekstlig_beskrivelse`) VALUES ('%s','%s')", Ovelsenavn, beskrivelse);
 			stmt.executeUpdate(sql1);
 			stmt.executeUpdate(sql);
 		} catch (SQLException e) {
@@ -103,7 +103,7 @@ public class RegisterHandler {
 	public static void infoOmSisteOkter(int n) {
 		try {
 			stmt = conn.createStatement();
-			String sql = "SELECT * FROM Treningsokt order by OktID DESC";
+			String sql = String.format("SELECT * FROM Treningsokt WHERE OktID<= '%s' order by OktID DESC", n);
 			Statement stmt2 = conn.createStatement();
 			
 			ResultSet result = stmt.executeQuery(sql);
@@ -127,8 +127,6 @@ public class RegisterHandler {
 						"Notat: " + notat + '\n' +  "----------------------------" + '\n' + '\n'
 						);
 				}
-				
-				
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -197,23 +195,24 @@ public class RegisterHandler {
 		java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
 		//registerTreningsokt(1, currentDate, 50, "Grei form", "Greit prestert");	
 		//registerTreningsokt(2, currentDate, 70, "Sykt bra form", "Sykt bra prestert");*/ 
+		//registerFriOvelse("TestØvels1", "Kul øvelse");
 		ArrayList<String> testListe = new ArrayList<String>();
 		testListe.add("TestØvels1");
 		//registerTreningsokt(1, currentDate, 40, 10, 8, testListe, "Kort og god økt.");
 		//infoOmSisteOkter(5);
 		ArrayList<Integer> vektSettTest = new ArrayList<Integer>();
-		vektSettTest.add(555);
-		vektSettTest.add(12);
+		vektSettTest.add(55);
+		vektSettTest.add(5);
 		
 		ArrayList<Integer> vektSettTest2 = new ArrayList<Integer>();
-		vektSettTest2.add(99);
-		vektSettTest2.add(13);
+		vektSettTest2.add(77);
+		vektSettTest2.add(7);
 		//registerApparatOvelse("Deadlift");
 		Map<String,ArrayList<Integer>> testListe2 = new HashMap<String, ArrayList<Integer>>();
 		testListe2.put("Benkpress", vektSettTest);
 		testListe2.put("Deadlift", vektSettTest2);
-		//registerTreningsokt(20, currentDate, 939, 1, 1, testListe, testListe2, "Test test bla bla");
-		getApparatOvelseOkter(20, "Benkpress");
+		registerTreningsokt(14, currentDate, 111, 4, 4, testListe, testListe2, "Funger da!!");
+		getApparatOvelseOkter(14, "Benkpress");
 	}
 
 }
