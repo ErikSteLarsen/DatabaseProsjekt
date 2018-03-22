@@ -1,5 +1,7 @@
 package com.mycompany.app;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -50,7 +52,9 @@ public class RegisterHandler {
 	public static void registerFriOvelse(String Ovelsenavn, String beskrivelse) {
 		try {
 			stmt = conn.createStatement();
+			String sql1 = String.format("INSERT INTO `Ovelse`(`Ovelsenavn`) VALUES ('%s')", Ovelsenavn);
 			String sql = String.format("INSERT INTO `FrivektsOvelse`(`Ovelsenavn`, `Beskrivelse`) VALUES ('%s','%s')", Ovelsenavn, beskrivelse);
+			stmt.executeUpdate(sql1);
 			stmt.executeUpdate(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -87,9 +91,7 @@ public class RegisterHandler {
 				String sql2 = String.format("INSERT INTO `ApparatOvelseForOkt`(`Ovelsenavn`, `OktID`, `Vekt`, `Sett`) VALUES ('%s', '%s', '%s', '%s')", apparatOvelser.keySet().toArray()[x], oktid, apparatOvelser.get(apparatOvelser.keySet().toArray()[x]).toArray()[0], apparatOvelser.get(apparatOvelser.keySet().toArray()[x]).toArray()[1]);
 				//System.out.println(sql2);
 				stmt3.executeUpdate(sql2);
-				}
-			
-			
+				}	
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -135,27 +137,83 @@ public class RegisterHandler {
 		}
 	}
 	
+	
+	
+	//Printer ut info om alle treningsøkter med OktID opp til og med n. Starter med OktID nr n og går nedover.
+	public static void getApparatOvelseOkter(int oktid, String apparatOvelse) {
+		try {
+			stmt = conn.createStatement();
+			String sql = String.format("SELECT * FROM ApparatOvelseForOkt WHERE Ovelsenavn ='%s' AND (OktID='%s' or OktID<'%s') order by OktID ASC", apparatOvelse, oktid, oktid);
+			//Statement stmt2 = conn.createStatement();
+			String prevOvelsenavn = null;
+			int prevOktID = 0;
+			int prevVekt = 0;
+			int prevSett = 0;
+			
+			String ovelsenavn = null;
+			int oktID;
+			int vekt = 0;
+			int sett = 0;
+			
+			
+			ResultSet result = stmt.executeQuery(sql);
+			while(result.next()) {
+				if(result.getInt("OktID") ==oktid && result.getRow()==0) {
+					System.out.println("Dette var den første treningsøkten");
+					break;
+				}
+				System.out.println("Ovelsenavn, loop: " + result.getString("Ovelsenavn"));
+				if(result.getInt("OktID")==oktid) {
+					ovelsenavn = result.getString("Ovelsenavn");
+					oktID = result.getInt("OktID");
+					vekt = result.getInt("Vekt");
+					sett = result.getInt("Sett");
+					break;
+				}					
+				else {
+					prevOvelsenavn = result.getString("Ovelsenavn");
+					prevOktID = result.getInt("OktID");
+					prevVekt = result.getInt("Vekt");
+					prevSett = result.getInt("Sett");
+				}
+			}
+			//Gir vektfremgangen i prosent
+			double vektFremgang = ((((double)vekt/(double)prevVekt)-1)*100); 
+			//Gir settfremgangen i prosent
+			double settFremgang = ((((double)sett/(double)prevSett)-1)*100);
+			
+			System.out.println("Ovelse: " + ovelsenavn + "\nOktID: " + oktid + "\nVekt: " + vekt + "\nSett: " + sett);	
+			System.out.println("Forrige ovelse: " + prevOvelsenavn + "\nForrige OktID: " + prevOktID + "\nForrige vekt: " + prevVekt + "\nForrige sett: " + prevSett);
+			System.out.println("Fremgang, antall kilo: " + vektFremgang + "%" + "\nFremgang, antall sett: " + settFremgang +"%");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String[] args) {
 		
 		java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
-		//registerTreningsokt(1, currentDate, 50, "Grei form", "Greit prestert");
+		//registerTreningsokt(1, currentDate, 50, "Grei form", "Greit prestert");	
 		//registerTreningsokt(2, currentDate, 70, "Sykt bra form", "Sykt bra prestert");*/ 
 		ArrayList<String> testListe = new ArrayList<String>();
 		testListe.add("TestØvels1");
 		//registerTreningsokt(1, currentDate, 40, 10, 8, testListe, "Kort og god økt.");
 		//infoOmSisteOkter(5);
 		ArrayList<Integer> vektSettTest = new ArrayList<Integer>();
-		vektSettTest.add(50);
-		vektSettTest.add(5);
+		vektSettTest.add(555);
+		vektSettTest.add(12);
 		
 		ArrayList<Integer> vektSettTest2 = new ArrayList<Integer>();
-		vektSettTest2.add(88);
-		vektSettTest2.add(8);
+		vektSettTest2.add(99);
+		vektSettTest2.add(13);
 		//registerApparatOvelse("Deadlift");
 		Map<String,ArrayList<Integer>> testListe2 = new HashMap<String, ArrayList<Integer>>();
 		testListe2.put("Benkpress", vektSettTest);
 		testListe2.put("Deadlift", vektSettTest2);
-		registerTreningsokt(16, currentDate, 111, 10, 10, testListe, testListe2, "Shit nå funker ting bra");
+		//registerTreningsokt(20, currentDate, 939, 1, 1, testListe, testListe2, "Test test bla bla");
+		getApparatOvelseOkter(20, "Benkpress");
 	}
 
 }
