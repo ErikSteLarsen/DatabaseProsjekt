@@ -77,9 +77,9 @@ public class OvelseGrupper {
 	// lager relasjon i OvelseIGruppe med ovelsenavnet og navnet på ovelsegruppen. bruker privatfunksjoner for å sjekke at ovelsen eksisterer i databasen.
 	public void createOvelseGruppe(String navn) {
 		//Erik kan fikse pent. generell inntil videre
+		System.out.println("Tast inn nummer på apparatovelsene du vil legge til i ovelsegruppen: ");
 		System.out.println(apparatOvelseList().toString());
-		System.out.println("Tast inn nummer på ovelsene du vil legge til i ovelsegruppen: ");
-		System.out.println("Tast q hvis du er ferdig.");
+		System.out.println("Tast n hvis for å gå videre til frivektsovelsene");
 		Scanner sc = new Scanner(System.in);
 		
 		List<String> chosenApparatOvelser = new ArrayList<String>();
@@ -87,8 +87,29 @@ public class OvelseGrupper {
 		List<String> apparatOvelseKeys = new ArrayList<String>();
 		List<String> frivektsOvelseKeys = new ArrayList<String>();
 		
-		int i = sc.nextInt();
-		chosenApparatOvelser.add(apparatOvelseList().get(i));
+		String firstInput = sc.nextLine();
+		while(!(firstInput.contains("n"))) {
+			int i = Integer.parseInt(firstInput);
+			chosenApparatOvelser.add(apparatOvelseList().get(i));
+			firstInput = sc.nextLine();
+			if(firstInput == "n") {
+				break;
+				
+			}
+		}
+		
+		System.out.println(frivektsOvelseList().toString());
+		System.out.println("Tast inn nummer på apparatovelsene du vil legge til i ovelsegruppen: ");
+		System.out.println("Tast q når du er ferdig");
+		String secondInput = sc.nextLine();
+		while (!(secondInput.contains("q"))) {
+			int i_2 = Integer.parseInt(secondInput);
+			chosenFrivektsOvelser.add(frivektsOvelseList().get(i_2));
+			secondInput = sc.nextLine();
+			if(secondInput == "n") {
+				break;
+			}
+		}
 		
 		for (String ovelse : chosenApparatOvelser) {
 			String[] split = ovelse.split(":");
@@ -160,7 +181,7 @@ public class OvelseGrupper {
 		List<String> frivektsOvelse = new ArrayList<String>();
 		try {
 			stmt = conn.createStatement();
-			String sql = "SELECT * FROM Frivektsovelse";
+			String sql = "SELECT * FROM FrivektsOvelse";
 			ResultSet rs = stmt.executeQuery(sql);
 			int i = 0;
 			while(rs.next()) {
@@ -177,47 +198,10 @@ public class OvelseGrupper {
 		return frivektsOvelse;
 	}
 	
-	/* private funksjoner for å sjekke om øvelser eksisterer. men brukes ikke.
-	private boolean checkApparat(String ovelsenavn) {
-		try {
-			stmt = conn.createStatement();
-			String sql = "SELECT Ovelsenavn FROM ApparatOvelse";
-			ResultSet rs;
-			rs = stmt.executeQuery(sql);
-			while(rs.next()) {
-				if(ovelsenavn == rs.getString("Ovelsenavn"));
-				return true;
-			}
-		}catch(SQLException e) {
-			e.printStackTrace();
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-	
-	private boolean checkFrivekt(String ovelsenavn) {
-		try {
-			stmt = conn.createStatement();
-			String sql = "SELECT Ovelsenavn FROM FrivektsOvelse";
-			ResultSet rs;
-			rs = stmt.executeQuery(sql);
-			while(rs.next()) {
-				if(ovelsenavn == rs.getString("Ovelsenavn"));
-				return true;
-			}
-		}catch(SQLException e) {
-			e.printStackTrace();
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-*/
 
 	
 	public static void main(String[] args) {
 		OvelseGrupper app = new OvelseGrupper();
-		System.out.println(app.showGroups());
+		app.createOvelseGruppe("test3");
 	}
 }
